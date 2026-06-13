@@ -23,12 +23,12 @@ public:
     void create(int width, int height);
 
 public:
-    inline wl_display* get_display() const noexcept
+    inline wl_display* getDisplay() const noexcept
     {
         return this->display;
     }
 
-    inline wl_surface* get_surface() const noexcept
+    inline wl_surface* getSurface() const noexcept
     {
         return this->surface;
     }

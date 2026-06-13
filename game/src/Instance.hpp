@@ -16,8 +16,8 @@ private:
     DELETE_COPY_MOVE(Instance);
 
 private:
-    VkApplicationInfo get_app_info() const;
-    bool has_wayland_support() const;
+    VkApplicationInfo getAppInfo() const;
+    bool hasWaylandSupport() const;
 
 public:
     inline operator VkInstance() const noexcept

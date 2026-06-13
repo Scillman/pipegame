@@ -8,14 +8,13 @@ Instance::Instance() :
 
 Instance::~Instance()
 {
-    if (this->instance != VK_NULL_HANDLE)
-    {
+    if (this->instance != VK_NULL_HANDLE) {
         vkDestroyInstance(this->instance, nullptr);
     }
 }
 
 VkApplicationInfo
-Instance::get_app_info() const
+Instance::getAppInfo() const
 {
     VkApplicationInfo info { };
 
@@ -30,7 +29,7 @@ Instance::get_app_info() const
 }
 
 bool
-Instance::has_wayland_support() const
+Instance::hasWaylandSupport() const
 {
     uint32_t count = 0u;
     VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr));
@@ -39,10 +38,8 @@ Instance::has_wayland_support() const
     VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()));
 
     bool has_wayland_extension = false;
-    for (const VkExtensionProperties& extension : extensions)
-    {
-        if (strcmp(extension.extensionName, VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME) == 0)
-        {
+    for (const VkExtensionProperties& extension: extensions) {
+        if (strcmp(extension.extensionName, VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME) == 0) {
             has_wayland_extension = true;
             break;
         }
@@ -59,11 +56,10 @@ Instance::has_wayland_support() const
 void
 Instance::create()
 {
-    VkApplicationInfo app_info = this->get_app_info();
+    VkApplicationInfo app_info = this->getAppInfo();
 
-    this->has_wayland_support();
+    this->hasWaylandSupport();
 
-    // Create instance
     VkInstanceCreateInfo create_info { };
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     create_info.pApplicationInfo = &app_info;

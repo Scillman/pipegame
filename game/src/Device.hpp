@@ -32,6 +32,7 @@ public:
 
 private:
     std::vector<VkPhysicalDevice> getPhysicalDevices() const;
+    bool isSuitableDevice(VkPhysicalDevice device) const;
     void pickPhysicalDevice();
     void createLogicalDevice();
 

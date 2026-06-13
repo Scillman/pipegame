@@ -9,8 +9,7 @@ Surface::Surface(Instance& instance) :
 
 Surface::~Surface()
 {
-    if (this->surface != VK_NULL_HANDLE)
-    {
+    if (this->surface != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(this->instance, this->surface, nullptr);
     }
 }
@@ -21,8 +20,8 @@ Surface::create(const Window& window)
     VkWaylandSurfaceCreateInfoKHR create_info { };
 
     create_info.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
-    create_info.display = window.get_display();
-    create_info.surface = window.get_surface();
+    create_info.display = window.getDisplay();
+    create_info.surface = window.getSurface();
 
     VK_CHECK(vkCreateWaylandSurfaceKHR(this->instance, &create_info, nullptr, &(this->surface)));
 }

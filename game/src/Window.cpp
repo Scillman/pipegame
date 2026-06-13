@@ -13,8 +13,7 @@ Window::Window() :
 
 Window::~Window()
 {
-    if (this->display != nullptr)
-    {
+    if (this->display != nullptr) {
         wl_display_disconnect(this->display);
     }
 }
@@ -25,8 +24,7 @@ void Window::create(int width, int height)
     this->height = height;
 
     this->display = wl_display_connect(nullptr);
-    if (this->display == nullptr)
-    {
+    if (this->display == nullptr) {
         std::cerr << "Failed to connect to Wayland display" << std::endl;
         exit(EXIT_FAILURE);
     }

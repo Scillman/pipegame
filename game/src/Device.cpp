@@ -11,8 +11,7 @@ Device::Device(VkInstance instance, VkSurfaceKHR surface) :
 
 Device::~Device()
 {
-    if (this->logical_device != VK_NULL_HANDLE)
-    {
+    if (this->logical_device != VK_NULL_HANDLE) {
         vkDestroyDevice(this->logical_device, nullptr);
     }
 }
@@ -23,8 +22,7 @@ Device::getPhysicalDevices() const
     uint32_t count = 0u;
     VK_CHECK(vkEnumeratePhysicalDevices(this->instance, &count, nullptr));
 
-    if (count == 0u)
-    {
+    if (count == 0u) {
         std::cerr << "No Vulkan-compatible devices found" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -34,25 +32,38 @@ Device::getPhysicalDevices() const
     return devices;
 }
 
+bool
+Device::isSuitableDevice(VkPhysicalDevice device) const
+{
+    VkPhysicalDeviceProperties properties;
+    vkGetPhysicalDeviceProperties(device, &properties);
+
+    VkPhysicalDeviceFeatures features;
+    vkGetPhysicalDeviceFeatures(device, &features);
+
+    return properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+        features.geometryShader;
+}
+
 void
 Device::pickPhysicalDevice()
 {
     std::vector<VkPhysicalDevice> devices = this->getPhysicalDevices();
 
-    for (const VkPhysicalDevice& device: devices)
-    {
+    for (const VkPhysicalDevice& device: devices) {
+        if (!this->isSuitableDevice(device)) {
+            continue;
+        }
+
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(device, &properties);
-
         std::cout << "Found device: " << properties.deviceName << std::endl;
 
-        // TODO: pick dedicated GPU
         this->physical_device = device;
         break;
     }
 
-    if (this->physical_device == VK_NULL_HANDLE)
-    {
+    if (this->physical_device == VK_NULL_HANDLE) {
         std::cerr << "No suitable Vulkan device found" << std::endl;
         exit(EXIT_FAILURE);
     }
