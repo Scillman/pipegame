@@ -1,0 +1,8 @@
+# Directories
+.vscode/
+
+# File extensions
+*.o
+
+# Specific files
+game/pipegame

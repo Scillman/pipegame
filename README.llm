@@ -1,0 +1,18 @@
+# Basic Tags
+* Arch Linux
+* Wayland
+* Vulkan
+* Pipe game
+
+# Directory Setup
+* game/
+  * assets/
+  * shaders/
+  * src/
+* docker/
+
+# Description
+I like water pipe(s) Android games on my phone. In these games there is a puzzle using pipes and water. There is 1+ source blocks and 1+ destination blocks, the rest of the blocks are straight (180 degrees), turns/corners (90 degrees), T-splitsing and four-way (this last one cannot be rotated.) The goal is to connect 1 source to 1+ destinations by rotating the blocks.
+
+# Execute
+Can you generate me an C++ Vulkan example of a game that can do this on a PC that is running Arch Linux with Wayland. Compiling should be done through/inside a docker container.
