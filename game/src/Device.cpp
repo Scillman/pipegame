@@ -61,7 +61,7 @@ Device::pickPhysicalDevice()
 void
 Device::createLogicalDevice()
 {
-    VkDeviceCreateInfo device_create_info{};
+    VkDeviceCreateInfo device_create_info { };
     device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
     VK_CHECK(vkCreateDevice(this->physical_device, &device_create_info, nullptr, &(this->logical_device)));
