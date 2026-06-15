@@ -2,12 +2,14 @@
 #define WINDOW_HPP
 
 #include <SDL3/SDL.h>
+#include "common.hpp"
 
 class Window
 {
 private:
     bool initialized;
     SDL_Window* window;
+    SDL_Renderer* renderer;
 
 private:
     Window();
@@ -16,15 +18,18 @@ public:
     ~Window();
 
 // private:
-//     Window(const Window&) = default;
-//     Window& operator=(const Window&) = default;
-
-//     Window(Window&&) noexcept = default;
-//     Window& operator=(Window&&) noexcept = default;
+//     DELETE_COPY_MOVE(Window);
 
 private:
-    void initializeSDL();
-    void createSDLWindow(int width, int height, const char* title);
+    void initialize();
+    void createWindow(int width, int height, const char* title);
+    void createRenderer();
+
+    void processEvents(bool& running);
+    void update();
+    void render();
+
+    void clearScreen();
 
 public:
     static Window create(int width, int height, const char* title);
