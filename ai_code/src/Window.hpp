@@ -15,12 +15,16 @@ private:
 public:
     ~Window();
 
-private:
-    Window(const Window&) = default;
-    Window& operator=(const Window&) = default;
+// private:
+//     Window(const Window&) = default;
+//     Window& operator=(const Window&) = default;
 
-    Window(Window&&) noexcept = default;
-    Window& operator=(Window&&) noexcept = default;
+//     Window(Window&&) noexcept = default;
+//     Window& operator=(Window&&) noexcept = default;
+
+private:
+    void initializeSDL();
+    void createSDLWindow(int width, int height, const char* title);
 
 public:
     static Window create(int width, int height, const char* title);

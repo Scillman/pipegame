@@ -19,11 +19,9 @@ Window::~Window()
     }
 }
 
-Window
-Window::create(int width, int height, const char* title)
+void
+Window::initializeSDL()
 {
-    Window window;
-
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init failed: "
                   << SDL_GetError()
@@ -31,14 +29,20 @@ Window::create(int width, int height, const char* title)
         exit(EXIT_FAILURE);
     }
 
-    window.window = SDL_CreateWindow(
+    this->initialized = true;
+}
+
+void
+Window::createSDLWindow(int width, int height, const char* title)
+{
+    this->window = SDL_CreateWindow(
         title,
         width,
         height,
         SDL_WINDOW_RESIZABLE
     );
 
-    if (window.window == NULL) {
+    if (this->window == NULL) {
         std::cerr << "Window creation failed: "
                   << SDL_GetError()
                   << '\n';
@@ -46,6 +50,15 @@ Window::create(int width, int height, const char* title)
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
+}
+
+Window
+Window::create(int width, int height, const char* title)
+{
+    Window window;
+
+    window.initializeSDL();
+    window.createSDLWindow(width, height, title);
 
     return window;
 }
