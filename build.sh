@@ -6,7 +6,7 @@ docker container rm pipegame
 
 # Start a new container
 docker run \
-    -v './game:/app' \
+    -v './ai_code:/app' \
     --name pipegame \
     pipegame:latest \
     make pipegame

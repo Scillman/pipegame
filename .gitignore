@@ -1,5 +1,6 @@
 # Directories
 .vscode/
+external/
 
 # File extensions
 *.o
