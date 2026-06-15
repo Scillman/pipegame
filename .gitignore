@@ -6,4 +6,4 @@ external/
 *.o
 
 # Specific files
-game/pipegame
+**/pipegame
