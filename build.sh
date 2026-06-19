@@ -2,32 +2,54 @@
 
 CONTAINER_NAME=pipegame-builder
 
-if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
-    STATUS=$(docker container inspect -f '{{.State.Status}}' "$CONTAINER_NAME")
-    case "$STATUS" in
-        created|running|paused|restarting)
-            echo "Stopping Docker container..."
-            docker stop "$CONTAINER_NAME"
-            echo "Removing Docker container..."
-            docker container rm "$CONTAINER_NAME"
-            ;;
-        exited|dead)
-            echo "Removing Docker container..."
-            docker container rm "$CONTAINER_NAME"
-            ;;
-        *)
-            echo "Container exists but in unsupported of $STATUS"
-            ;;
-    esac
-else
-    echo "Container does not exist"
+ARG_CLEAN=false
+ARG_BUILD=true
+ARG_RUN=false
+ARG_DIR=game
+
+i=1;
+j=$#;
+while [ $i -le $j ]; do
+    PARAM=$1;
+    if [ "$PARAM" = "--clean" ]; then
+        ARG_CLEAN=true
+    elif [ "$PARAM" = "--no-build" ]; then
+        ARG_BUILD=false
+    elif [ "$PARAM" = "--run" ]; then
+        ARG_RUN=true
+    else
+        ARG_DIR=$1
+        shift 1
+        break
+    fi
+
+    i=$((i + 1));
+    shift 1;
+done
+
+if [ ! -d "$ARG_DIR" ]; then
+    echo "Source directory '$ARG_DIR' not found..."
+    exit 0
 fi
 
-echo "Starting Docker container..."
-docker run \
-    -v './ai_code:/app' \
-    --name "$CONTAINER_NAME" \
-    pipegame:latest \
-    make clean pipegame
+MAKE_ARGS=
 
-# docker logs pipegame
+if [ $ARG_CLEAN = true ]; then
+    MAKE_ARGS="$MAKE_ARGS clean"
+fi
+
+if [ $ARG_BUILD = true ]; then
+    MAKE_ARGS="$MAKE_ARGS all"
+fi
+
+DOCKER_MAKE="docker run --rm \
+    --name "$CONTAINER_NAME" \
+    -v "./$ARG_DIR:/app" \
+    pipegame:latest \
+    make $MAKE_ARGS"
+echo $DOCKER_MAKE
+$DOCKER_MAKE
+
+if [ $ARG_RUN = true ]; then
+    "./${ARG_DIR}/pipegame" $@
+fi
