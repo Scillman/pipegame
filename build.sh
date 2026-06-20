@@ -7,6 +7,19 @@ ARG_BUILD=true
 ARG_RUN=false
 ARG_DIR=game
 
+function printUsage()
+{
+    echo ""
+    echo "USAGE: build.sh <OPTIONS> <game_dir> <run_args>"
+    echo ""
+    echo "OPTIONS"
+    echo "  --clean      Clean before compiling"
+    echo "  --help       Display this help message"
+    echo "  --no-build   Do not compile and/or build"
+    echo "  --run        Run the game after compiling"
+    echo ""
+}
+
 i=1;
 j=$#;
 while [ $i -le $j ]; do
@@ -17,6 +30,9 @@ while [ $i -le $j ]; do
         ARG_BUILD=false
     elif [ "$PARAM" = "--run" ]; then
         ARG_RUN=true
+    elif [ "$PARAM" = "--help" ]; then
+        printUsage
+        exit 0
     else
         ARG_DIR=$1
         shift 1
