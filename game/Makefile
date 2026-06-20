@@ -1,8 +1,8 @@
 # Makefile for PipeGame Vulkan application
 
-CXX = g++
+CXX = g++ -I/redist/include
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra
-LDFLAGS = -lvulkan -lwayland-client
+LDFLAGS = -L/redist/lib -lvulkan -lwayland-client -lSDL3
 
 TARGET = pipegame
 SRCDIR = src
@@ -24,4 +24,4 @@ $(TARGET): $(OBJECTS)
 clean:
 	rm -f $(OBJECTS) $(TARGET)
 
-.PHONY: all clean
+.PHONY: all clean install-deps
