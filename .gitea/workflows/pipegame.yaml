@@ -8,6 +8,17 @@ on:
     tags:
       - 'v*'
 
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: Build configuration
+        required: true
+        default: Release
+        type: choice
+        options:
+          - Debug
+          - Release
+
 jobs:
   build_branch:
     runs-on: ubuntu-latest
