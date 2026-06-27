@@ -10,13 +10,19 @@ jobs:
     container:
       image: registry.local:5000/pipegame:latest
       options: >-
-        -v ${{ gitea.workspace }}/game:/data
+        -v ${{ gitea.workspace }}:/app
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Check environment
-        run: make all
+        run: |
+          ls -la
+
+      - name: Build pipegame
+        run: |
+          cd game
+          make all
 
       - name: Upload binary
         uses: christopherhx/gitea-upload-artifact@v4
