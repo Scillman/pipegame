@@ -2,6 +2,9 @@ name: Build
 
 on:
   push:
+    branches:
+      - main
+      - development
 
 jobs:
   build:
@@ -15,16 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check environment
-        run: |
-          ls -la
-
       - name: Build pipegame
         run: |
           cd game
           make all
 
-      - name: Upload binary
+      - name: Upload artifacts
         uses: christopherhx/gitea-upload-artifact@v4
         with:
           name: pipegame
