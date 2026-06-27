@@ -26,6 +26,9 @@ public:
 private:
     DELETE_COPY_MOVE(Application);
 
+public:
+    void release() noexcept;
+
 private:
     void printUsageMessage(const char* binName) const;
 

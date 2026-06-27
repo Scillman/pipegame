@@ -67,5 +67,8 @@ echo $DOCKER_MAKE
 $DOCKER_MAKE
 
 if [ $ARG_RUN = true ]; then
-    "./${ARG_DIR}/pipegame" $@
+    BIN_FILE="./${ARG_DIR}/pipegame"
+    if [ -f "$BIN_FILE" ]; then
+        $BIN_FILE $@
+    fi
 fi

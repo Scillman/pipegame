@@ -14,39 +14,53 @@ Engine::Engine() :
     physicalDevice(VK_NULL_HANDLE),
     logicalDevice(VK_NULL_HANDLE)
 {
-
+    this->validation.enable();
 }
 
 Engine::~Engine()
 {
+    this->release();
+}
+
+void
+Engine::release() noexcept
+{
     if (VK_NULL_HANDLE != this->logicalDevice) {
         vkDestroyDevice(this->logicalDevice, this->allocator);
         LOG_VERBOSE("Logical device destroyed");
+        this->logicalDevice = VK_NULL_HANDLE;
     }
 
     if (VK_NULL_HANDLE != this->surface) {
         vkDestroySurfaceKHR(this->instance, this->surface, this->allocator);
         LOG_VERBOSE("Render surface destroyed");
+        this->surface = VK_NULL_HANDLE;
     }
+
+    this->validation.release();
 
     if (VK_NULL_HANDLE != this->instance) {
         vkDestroyInstance(this->instance, this->allocator);
         LOG_VERBOSE("Vulkan instance destroyed");
+        this->instance = VK_NULL_HANDLE;
     }
 
     if (NULL != this->windowRenderer) {
         SDL_DestroyRenderer(this->windowRenderer);
         LOG_VERBOSE("Window renderer destroyed");
+        this->windowRenderer = NULL;
     }
 
     if (NULL != this->window) {
         SDL_DestroyWindow(this->window);
         LOG_VERBOSE("Window destroyed");
+        this->window = NULL;
     }
 
     if (this->isSDLInitialized) {
         SDL_Quit();
         LOG_VERBOSE("SDL_Quit called");
+        this->isSDLInitialized = false;
     }
 }
 
@@ -115,6 +129,38 @@ Engine::getApplicationInfo() const
     return info;
 }
 
+bool
+Engine::instanceHasLayers(const std::vector<const char*>& requiredLayers) const
+{
+    uint32_t count;
+    vkEnumerateInstanceLayerProperties(&count, nullptr);
+
+    // if (count < requiredLayers.size()) {
+    //     LOG_WARNING("Missing one or more instance layers");
+    //     return false;
+    // }
+
+    std::vector<VkLayerProperties> layers(count);
+    vkEnumerateInstanceLayerProperties(&count, layers.data());
+
+    for (const char* requiredLayer: requiredLayers) {
+        bool found = false;
+
+        for (const VkLayerProperties& layer: layers) {
+            if (0 == strcmp(requiredLayer, layer.layerName)) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            LOG_WARNING("Missing instance layer %s", requiredLayer);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 /**
  * TODO: double-check if SDL already does this for us... it probably does.
  */
@@ -151,6 +197,21 @@ Engine::hasWaylandSupport() const
 bool
 Engine::createInstance()
 {
+    std::vector<const char*> required_layers = { };
+
+    std::vector<const char*> required_extensions = {
+        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME
+    };
+
+    if (this->validation.isEnabled()) {
+        required_layers.push_back(this->validation.getValidationLayer());
+    }
+
+    if (!this->instanceHasLayers(required_layers)) {
+        return false;
+    }
+
     if (!this->hasWaylandSupport()) {
         return false;
     }
@@ -161,14 +222,21 @@ Engine::createInstance()
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     create_info.pApplicationInfo = &app_info;
 
+    if (this->validation.isEnabled()) {
+        required_extensions.push_back(this->validation.getValidationExtension());
+    }
 
-    const char* required_extensions[] = {
-        VK_KHR_SURFACE_EXTENSION_NAME,
-        VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME
-    };
+    create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
+    create_info.ppEnabledExtensionNames = required_extensions.data();
 
-    create_info.enabledExtensionCount = 2u;
-    create_info.ppEnabledExtensionNames = required_extensions;
+    if (required_layers.size() > 0u) {
+        create_info.enabledLayerCount = static_cast<uint32_t>(required_layers.size());
+        create_info.ppEnabledLayerNames = required_layers.data();
+    }
+
+    // if (this->validation.isEnabled()) {
+    //     create_info.pNext = &this->validation.getCreateInfo();
+    // }
 
     VkResult result = vkCreateInstance(
         &create_info,
@@ -177,6 +245,15 @@ Engine::createInstance()
     );
     VK_CHECK(result);
 
+    return true;
+}
+
+bool
+Engine::setupValidation()
+{
+    if (this->validation.isEnabled()) {
+        return this->validation.create(this->instance, this->allocator);
+    }
     return true;
 }
 
@@ -311,6 +388,10 @@ Engine::create()
         return false;
     }
 
+    if (!this->setupValidation()) {
+        return false;
+    }
+
     if (!this->createSurface()) {
         return false;
     }
@@ -319,9 +400,9 @@ Engine::create()
         return false;
     }
 
-    if (!this->createLogicalDevice()) {
-        return false;
-    }
+    // if (!this->createLogicalDevice()) {
+    //     return false;
+    // }
 
     return true;
 }

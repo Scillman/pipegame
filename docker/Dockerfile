@@ -2,6 +2,11 @@ FROM archlinux:latest
 
 ARG SDL_VERSION=3.4.10
 
+# ARG VULKAN_VERSION=1.4.350.1
+# RUN wget "https://sdk.lunarg.com/sdk/download/$VULKAN_VERSION/linux/vulkansdk-linux-x86_64-$VULKAN_VERSION.tar.xz" && \
+#     wget "https://sdk.lunarg.com/sdk/download/$VULKAN_VERSION/linux/config.json" && \
+#     tar -xf "vulkansdk-linux-x86_64-${SDL_VERSION}.tar.xz"
+
 # Generate a key because apparently we need one
 RUN pacman-key --init
 
@@ -39,6 +44,18 @@ RUN pacman -Syu --noconfirm && \
         wayland-protocols \
         wget
 
+# GitHub Actions
+RUN pacman -S --noconfirm \
+        nodejs \
+        bash \
+        tar \
+        gzip \
+        unzip \
+        zip \
+        ca-certificates \
+        openssh \
+        python
+
 # Non-privileged user, same uid and gid as host system
 RUN groupadd -g 1001 developer && \
     useradd --no-create-home --home-dir /app -u 1001 -g developer developer
@@ -51,8 +68,8 @@ USER developer
 # Set working directory
 WORKDIR /tmp
 
-RUN wget "https://github.com/libsdl-org/SDL/releases/download/release-3.4.10/SDL3-$SDL_VERSION.tar.gz" && \
-    tar -xf "SDL3-${SDL_VERSION}".tar.gz
+RUN wget "https://github.com/libsdl-org/SDL/releases/download/release-$SDL_VERSION/SDL3-$SDL_VERSION.tar.gz" && \
+    tar -xf "SDL3-${SDL_VERSION}.tar.gz"
 
 RUN cmake \
         -S "SDL3-${SDL_VERSION}" \

@@ -9,7 +9,13 @@ Application::Application()
 
 Application::~Application()
 {
+    this->release();
+}
 
+void
+Application::release() noexcept
+{
+    this->engine.release();
 }
 
 void

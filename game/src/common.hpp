@@ -28,7 +28,7 @@
 
 
 #define LOG(msg, prefix, color, ...) \
-    std::printf(color "[" prefix "] " msg "\n", ##__VA_ARGS__)
+    std::printf(color "[" prefix "] " msg APP_COLOR_RESET "\n", ##__VA_ARGS__)
 
 #define LOG_INFO(msg, ...) \
     LOG(msg, "I", APP_COLOR_WHITE, ##__VA_ARGS__)

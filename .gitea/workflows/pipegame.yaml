@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: registry.local:5000/pipegame:latest
+      options: >-
+        -v ${{ gitea.workspace }}/game:/data
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check environment
+        run: make all
+
+      - name: Upload binary
+        uses: christopherhx/gitea-upload-artifact@v4
+        with:
+          name: pipegame
+          path: game/pipegame
