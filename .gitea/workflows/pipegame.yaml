@@ -5,9 +5,11 @@ on:
     branches:
       - main
       - development
+    tags:
+      - 'v*'
 
 jobs:
-  build:
+  build_branch:
     runs-on: ubuntu-latest
 
     container:
@@ -24,7 +26,8 @@ jobs:
           make all
 
       - name: Upload artifacts
+        if: startsWith(gitea.ref, 'refs/tags/')
         uses: christopherhx/gitea-upload-artifact@v4
         with:
-          name: pipegame
+          name: pipegame-${{ gitea.ref_name }}
           path: game/pipegame
