@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+COLOR_YELLOW="\033[1;33m"
+COLOR_RESET="\033[0m"
+
 CONTAINER_NAME=pipegame-builder
 
 ARG_CLEAN=false
@@ -63,12 +66,13 @@ DOCKER_MAKE="docker run --rm \
     -v "./$ARG_DIR:/app" \
     pipegame:latest \
     make $MAKE_ARGS"
-echo $DOCKER_MAKE
+printf "%b\n" "${COLOR_YELLOW}\$ ${DOCKER_MAKE}${COLOR_RESET}"
 $DOCKER_MAKE
 
 if [ $ARG_RUN = true ]; then
     BIN_FILE="./${ARG_DIR}/pipegame"
     if [ -f "$BIN_FILE" ]; then
+        printf "%b\n" "${COLOR_YELLOW}\$ ${BIN_FILE} $*${COLOR_RESET}"
         $BIN_FILE $@
     fi
 fi
