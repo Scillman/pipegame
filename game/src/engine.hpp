@@ -12,9 +12,16 @@ class Engine
 private:
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentFamily;
 
         bool isComplete() const;
     };
+
+private:
+    struct Queue {
+        VkQueue graphics;
+        VkQueue present;
+    } queue;
 
 private:
     VkAllocationCallbacks* allocator;

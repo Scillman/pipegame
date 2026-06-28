@@ -1,3 +1,4 @@
+#include <set>
 #include "engine.hpp"
 
 #define WINDOW_TITLE    "Pipe Game by SimpyGames"
@@ -7,7 +8,8 @@
 bool
 Engine::QueueFamilyIndices::isComplete() const
 {
-    return this->graphicsFamily.has_value();
+    return this->graphicsFamily.has_value()
+        && this->presentFamily.has_value();
 }
 
 Engine::Engine() :
@@ -366,6 +368,13 @@ Engine::findQueueFamilies(VkPhysicalDevice device) const
             indices.graphicsFamily = i;
         }
 
+        VkBool32 hasPresentSupport = VK_FALSE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, this->surface, &hasPresentSupport);
+
+        if (hasPresentSupport == VK_TRUE) {
+            indices.presentFamily = i;
+        }
+
         if (indices.isComplete()) {
             break;
         }
@@ -384,18 +393,27 @@ Engine::createLogicalDevice()
     QueueFamilyIndices indices = this->findQueueFamilies(this->physicalDevice);
     float queuePriority = 1.0f;
 
-    VkDeviceQueueCreateInfo queueInfo { };
-    queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueInfo.queueFamilyIndex = indices.graphicsFamily.value();
-    queueInfo.queueCount = 1u;
-    queueInfo.pQueuePriorities = &queuePriority;
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<uint32_t> uniqueQueueFamilies = {
+        indices.graphicsFamily.value(),
+        indices.presentFamily.value()
+    };
+
+    for (uint32_t queueFamily: uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo queueInfo { };
+        queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueInfo.queueFamilyIndex = queueFamily;
+        queueInfo.queueCount = 1u;
+        queueInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos.push_back(queueInfo);
+    }
 
     VkPhysicalDeviceFeatures features { };
 
     VkDeviceCreateInfo info { };
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    info.pQueueCreateInfos = &queueInfo;
-    info.queueCreateInfoCount = 1u;
+    info.pQueueCreateInfos = queueCreateInfos.data();
+    info.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     info.pEnabledFeatures = &features;
 
     result = vkCreateDevice(
@@ -405,6 +423,9 @@ Engine::createLogicalDevice()
         &this->logicalDevice
     );
     VK_CHECK(result);
+
+    vkGetDeviceQueue(this->logicalDevice, indices.graphicsFamily.value(), 0, &this->queue.graphics);
+    vkGetDeviceQueue(this->logicalDevice, indices.presentFamily.value(), 0, &this->queue.present);
 
     LOG_INFO("Created logical device");
     return true;
