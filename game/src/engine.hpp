@@ -1,6 +1,7 @@
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
+#include <optional>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include "common.hpp"
@@ -8,6 +9,13 @@
 
 class Engine
 {
+private:
+    struct QueueFamilyIndices {
+        std::optional<uint32_t> graphicsFamily;
+
+        bool isComplete() const;
+    };
+
 private:
     VkAllocationCallbacks* allocator;
     bool isSDLInitialized;
@@ -42,6 +50,8 @@ private:
     bool setupValidation();
 
     bool createSurface();
+
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
 
     std::vector<VkPhysicalDevice> getPhysicalDevices() const;
     bool isPhysicalDeviceSuitable(VkPhysicalDevice device) const;

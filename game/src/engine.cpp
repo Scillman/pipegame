@@ -4,6 +4,12 @@
 #define WINDOW_WIDTH    1280
 #define WINDOW_HEIGHT   720
 
+bool
+Engine::QueueFamilyIndices::isComplete() const
+{
+    return this->graphicsFamily.has_value();
+}
+
 Engine::Engine() :
     allocator(VK_NULL_HANDLE),
     isSDLInitialized(false),
@@ -135,6 +141,7 @@ Engine::instanceHasLayers(const std::vector<const char*>& requiredLayers) const
     uint32_t count;
     vkEnumerateInstanceLayerProperties(&count, nullptr);
 
+    // NOTE: Allows for quick return, but poor logging
     // if (count < requiredLayers.size()) {
     //     LOG_WARNING("Missing one or more instance layers");
     //     return false;
@@ -234,10 +241,6 @@ Engine::createInstance()
         create_info.ppEnabledLayerNames = required_layers.data();
     }
 
-    // if (this->validation.isEnabled()) {
-    //     create_info.pNext = &this->validation.getCreateInfo();
-    // }
-
     VkResult result = vkCreateInstance(
         &create_info,
         this->allocator,
@@ -245,6 +248,7 @@ Engine::createInstance()
     );
     VK_CHECK(result);
 
+    LOG_INFO("Vulkan instance created");
     return true;
 }
 
@@ -344,14 +348,55 @@ Engine::pickPhysicalDevice()
     return true;
 }
 
+Engine::QueueFamilyIndices
+Engine::findQueueFamilies(VkPhysicalDevice device) const
+{
+    QueueFamilyIndices indices;
+
+    uint32_t count = 0u;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &count, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(count);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &count, queueFamilies.data());
+
+    uint32_t i =0u;
+
+    for (const VkQueueFamilyProperties& queueFamily: queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphicsFamily = i;
+        }
+
+        if (indices.isComplete()) {
+            break;
+        }
+
+        ++i;
+    }
+
+    return indices;
+}
+
 bool
 Engine::createLogicalDevice()
 {
     VkResult result;
 
-    VkDeviceCreateInfo info { };
+    QueueFamilyIndices indices = this->findQueueFamilies(this->physicalDevice);
+    float queuePriority = 1.0f;
 
+    VkDeviceQueueCreateInfo queueInfo { };
+    queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueInfo.queueFamilyIndex = indices.graphicsFamily.value();
+    queueInfo.queueCount = 1u;
+    queueInfo.pQueuePriorities = &queuePriority;
+
+    VkPhysicalDeviceFeatures features { };
+
+    VkDeviceCreateInfo info { };
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    info.pQueueCreateInfos = &queueInfo;
+    info.queueCreateInfoCount = 1u;
+    info.pEnabledFeatures = &features;
 
     result = vkCreateDevice(
         this->physicalDevice,
@@ -400,9 +445,9 @@ Engine::create()
         return false;
     }
 
-    // if (!this->createLogicalDevice()) {
-    //     return false;
-    // }
+    if (!this->createLogicalDevice()) {
+        return false;
+    }
 
     return true;
 }
